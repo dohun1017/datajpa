@@ -90,7 +90,7 @@ class MemberRepositoryTest {
         memberRepository.save(member2);
 
         //when
-        List<Member> members = memberRepository.findByUsername(member2.getUsername());
+        List<Member> members = memberRepository.findUser(member2.getUsername(), member2.getAge());
 
         //then
         assertEquals(member2.getUsername(), members.get(0).getUsername());
