@@ -14,9 +14,7 @@ public class HelloController {
     private final MemberRepository memberRepository;
 
     @GetMapping("/hello")
-    @Transactional
     public String hello() {
-        memberRepository.save(new Member("testMember"));
         return "hello";
     }
 }
