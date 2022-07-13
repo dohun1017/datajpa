@@ -6,8 +6,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 import study.datajpa.entity.Member;
 
-import javax.persistence.EntityManager;
-
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.*;
@@ -20,9 +18,6 @@ class MemberJpaRepositoryTest {
     @Autowired
     MemberJpaRepository memberJpaRepository;
 
-    @Autowired
-    EntityManager em;
-
     @Test
     public void testMember() throws Exception {
         //given
@@ -31,7 +26,6 @@ class MemberJpaRepositoryTest {
         //when
         memberJpaRepository.save(member);
         Member findMember = memberJpaRepository.find(member.getId());
-        em.flush();
 
         //then
         assertThat(findMember.getId()).isEqualTo(member.getId());
@@ -57,17 +51,17 @@ class MemberJpaRepositoryTest {
 
         //리스트 조회 검증
         List<Member> members = memberJpaRepository.findAll();
-        assertEquals(members.size(), 2);
+        assertEquals(2, members.size());
 
         //카운트 검증
         long count = memberJpaRepository.count();
-        assertEquals(count, 2);
+        assertEquals(2, count);
 
         //삭제 검증
         memberJpaRepository.delete(member1);
         memberJpaRepository.delete(member2);
         long deletedCount = memberJpaRepository.count();
-        assertEquals(deletedCount, 0);
+        assertEquals(0, deletedCount);
 
     }
 
@@ -83,7 +77,23 @@ class MemberJpaRepositoryTest {
         List<Member> result = memberJpaRepository.findByUsernameAndAgeGreaterThan("AAA", 15);
 
         //then
-        assertEquals(result.get(0).getUsername(), "AAA");
-        assertEquals(result.get(0).getAge(), 20);
+        assertEquals("AAA", result.get(0).getUsername());
+        assertEquals(20, result.get(0).getAge());
+    }
+
+    @Test
+    public void testNamedQuery() throws Exception {
+        //given
+        Member member1 = new Member("AAA", 10);
+        Member member2 = new Member("BBB", 20);
+        memberJpaRepository.save(member1);
+        memberJpaRepository.save(member2);
+
+        //when
+        List<Member> members = memberJpaRepository.findByUsername(member2.getUsername());
+
+        //then
+        assertEquals(member2.getUsername(), members.get(0).getUsername());
+        assertEquals(member2, members.get(0));
     }
 }

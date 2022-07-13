@@ -3,7 +3,6 @@ package study.datajpa.repository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
 import study.datajpa.entity.Member;
 
@@ -14,7 +13,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @Transactional
-@Rollback(value = false)
 class MemberRepositoryTest {
 
     @Autowired
@@ -27,13 +25,12 @@ class MemberRepositoryTest {
 
         //when
         memberRepository.save(member);
-        Member findMember = memberRepository.findById(member.getId()).orElse(null);
+        Member findMember = memberRepository.findById(member.getId()).get();
 
         //then
-        assertThat(member.getId()).isEqualTo(findMember.getId());
-        assertThat(member.getUsername()).isEqualTo(findMember.getUsername());
+        assertThat(findMember.getId()).isEqualTo(member.getId());
+        assertThat(findMember.getUsername()).isEqualTo(member.getUsername());
         assertEquals(member, findMember);
-
     }
 
     @Test
@@ -54,17 +51,18 @@ class MemberRepositoryTest {
 
         //리스트 조회 검증
         List<Member> members = memberRepository.findAll();
-        assertEquals(members.size(), 2);
+        assertEquals(2, members.size());
 
         //카운트 검증
         long count = memberRepository.count();
-        assertEquals(count, 2);
+        assertEquals(2, count);
 
         //삭제 검증
         memberRepository.delete(member1);
         memberRepository.delete(member2);
         long deletedCount = memberRepository.count();
-        assertEquals(deletedCount, 0);
+        assertEquals(0, deletedCount);
+
     }
 
     @Test
@@ -79,7 +77,23 @@ class MemberRepositoryTest {
         List<Member> result = memberRepository.findByUsernameAndAgeGreaterThan("AAA", 15);
 
         //then
-        assertEquals(result.get(0).getUsername(), "AAA");
-        assertEquals(result.get(0).getAge(), 20);
+        assertEquals("AAA", result.get(0).getUsername());
+        assertEquals(20, result.get(0).getAge());
+    }
+
+    @Test
+    public void testNamedQuery() throws Exception {
+        //given
+        Member member1 = new Member("AAA", 10);
+        Member member2 = new Member("BBB", 20);
+        memberRepository.save(member1);
+        memberRepository.save(member2);
+
+        //when
+        List<Member> members = memberRepository.findByUsername(member2.getUsername());
+
+        //then
+        assertEquals(member2.getUsername(), members.get(0).getUsername());
+        assertEquals(member2, members.get(0));
     }
 }

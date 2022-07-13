@@ -9,6 +9,14 @@ import java.util.Objects;
 @Getter @Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @ToString(of = {"id", "username", "age"})
+@NamedQuery(
+        /**
+         * jpql은 메소드 호출한 순간에 파싱 오류 발생 - 런타임에러
+         * NamedQuery는 빌드할 때 파싱 오류 발생 - 컴파일에러
+        */
+        name = "Member.findByUsername",
+        query = "select m from Member m where m.username = :username"
+)
 public class Member {
 
     @Id
