@@ -4,9 +4,13 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
+import study.datajpa.dto.MemberDto;
 import study.datajpa.entity.Member;
+import study.datajpa.entity.Team;
 
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -17,6 +21,8 @@ class MemberRepositoryTest {
 
     @Autowired
     MemberRepository memberRepository;
+    @Autowired
+    TeamRepository teamRepository;
 
     @Test
     public void testMember() throws Exception {
@@ -96,4 +102,46 @@ class MemberRepositoryTest {
         assertEquals(member2.getUsername(), members.get(0).getUsername());
         assertEquals(member2, members.get(0));
     }
+
+    @Test
+    public void findUsernameList() throws Exception {
+        //given
+        Member member1 = new Member("AAA", 10);
+        Member member2 = new Member("BBB", 20);
+        memberRepository.save(member1);
+        memberRepository.save(member2);
+
+        List<String> usernameList = Stream.<String>builder()
+                .add(member1.getUsername())
+                .add(member2.getUsername())
+                .build()
+                .collect(Collectors.toList());
+
+        //when
+        List<String> findUsernameList = memberRepository.findUsernameList();
+
+
+        //then
+        assertEquals(usernameList, findUsernameList);
+    }
+
+    @Test
+    public void findMemberDto() throws Exception {
+        //given
+        Team teamA = new Team("teamA");
+        teamRepository.save(teamA);
+
+        Member memberA = new Member("AAA", 10);
+        memberA.setTeam(teamA);
+        memberRepository.save(memberA);
+
+        MemberDto memberDto = new MemberDto(memberA.getId(), memberA.getUsername(), teamA.getName());
+
+        //when
+        List<MemberDto> memberDtoList = memberRepository.findMemberDto();
+
+        //then
+        assertEquals(memberDto, memberDtoList.get(0));
+    }
+
 }
