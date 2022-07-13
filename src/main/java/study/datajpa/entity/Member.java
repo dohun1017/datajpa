@@ -55,7 +55,6 @@ public class Member {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Member member = (Member) o;
-
         return Objects.equals(getId(), member.getId()) && Objects.equals(getUsername(), member.getUsername());
     }
 
