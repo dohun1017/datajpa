@@ -300,9 +300,46 @@ class MemberRepositoryTest {
             System.out.println("member = " + m.getUsername());
             System.out.println("member.team = " + m.getTeam().getName());
         });
+    }
 
-        //then
+    @Test
+    public void queryHint() {
+        //given
+        Member member1 = new Member("member1", 10);
+        memberRepository.save(member1);
+        em.flush();
+        em.clear();
 
+        //when
 
+        /**
+         * @QueryHints(value = @QueryHint(name = "org.hibernate.readOnly", value = "true"))
+         * 단순 조회용 -> 영속성 컨텍스트 X
+         */
+        Member findMember = memberRepository.findReadOnlyByUsername(member1.getUsername());
+        findMember.setUsername("member2");
+
+        em.flush();
+    }
+
+    @Test
+    public void lock() {
+        //given
+        Member member1 = new Member("member1", 10);
+        memberRepository.save(member1);
+        em.flush();
+        em.clear();
+
+        //when
+
+        /**
+         * @Lock(LockModeType.PESSIMISTIC_WRITE)
+         * select for update
+         *
+         * SELECT ~ FOR UPDATE를 실행하면 특정 세션이 데이터에 대해 수정을 할 때까지 LOCK이 걸려 다른 세션이 데이터에 접근할 수 없다.
+         */
+        List<Member> lockByUsername = memberRepository.findLockByUsername(member1.getUsername());
+
+        em.flush();
     }
 }
