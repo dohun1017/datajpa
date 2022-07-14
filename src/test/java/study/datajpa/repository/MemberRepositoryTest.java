@@ -12,6 +12,7 @@ import study.datajpa.dto.MemberDto;
 import study.datajpa.entity.Member;
 import study.datajpa.entity.Team;
 
+import javax.persistence.EntityManager;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -29,6 +30,8 @@ class MemberRepositoryTest {
     MemberRepository memberRepository;
     @Autowired
     TeamRepository teamRepository;
+    @Autowired
+    EntityManager em;
 
     @Test
     public void testMember() throws Exception {
@@ -229,4 +232,31 @@ class MemberRepositoryTest {
         assertEquals(totalPageCount, page.getTotalPages());
     }
 
+    @Test
+    public void bulkUpdate() throws Exception {
+        //given
+        memberRepository.save(new Member("member1", 10));
+        memberRepository.save(new Member("member2", 20));
+        memberRepository.save(new Member("member3", 30));
+        memberRepository.save(new Member("member4", 40));
+        memberRepository.save(new Member("member5", 50));
+        teamRepository.save(new Team("teamA"));
+
+        //when
+        int resultCount = memberRepository.bulkAgePlus(20);
+
+        //then
+        assertEquals(4, resultCount);
+
+        /**
+         * memberRepository.bulkAgePlus(20); 호출했을 때 자동으로 flush 하지만 이 때 벌크쿼리와 관련된 엔티티만 flush하게 된다.
+         * 따라서 벌크 연산과 관계 없는 Entity들의 값을 저장하기 위해 flush를 호출해줘야 한다.
+         *
+         * @Modifying(clearAutomatically = true) 해당 내용으로 em.flush, em.clear 해결 가능.
+         */
+//        assertEquals(50, memberRepository.findMemberByUsername("member5").getAge());
+//        em.flush();
+//        em.clear();
+        assertEquals(51, memberRepository.findMemberByUsername("member5").getAge());
+    }
 }

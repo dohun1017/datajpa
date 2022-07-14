@@ -4,6 +4,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import study.datajpa.dto.MemberDto;
@@ -60,4 +61,15 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
      *      countQuery = "select count(m) from Member m")
      */
     Page<Member> findByAge(int age, Pageable pageable);
+
+    /**
+     * @Modifying 어노테이션이 있어야 데이터 변경이 일어남.
+     *      해당 어노테이션이 없을 때 데이터 변경 쿼리를 날리면 ExceptionError 발생
+     *
+     * 벌크 연산 이후 영속성 컨텍스트 초기화 하기
+     */
+    @Modifying
+    @Query(value = "update Member m set m.age = m.age + 1 where m.age >= :age")
+    int bulkAgePlus(@Param("age") int age);
+
 }
