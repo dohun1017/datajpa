@@ -259,4 +259,50 @@ class MemberRepositoryTest {
 //        em.clear();
         assertEquals(51, memberRepository.findMemberByUsername("member5").getAge());
     }
+
+    @Test
+    public void findMemberLazy() throws Exception {
+        //given
+        Team teamA = new Team("teamA");
+        Team teamB = new Team("teamB");
+        teamRepository.save(teamA);
+        teamRepository.save(teamB);
+
+        Member member1 = new Member("member1", 10, teamA);
+        Member member2 = new Member("member2", 10, teamB);
+        memberRepository.save(member1);
+        memberRepository.save(member2);
+
+        em.flush();
+        em.clear();
+
+        //when
+
+        /**
+         * N + 1 문제 발생
+         * 1 : select Member
+         * N : select Team
+         *
+         * @EntityGraph(attributePaths = {"team"}) 을 이용해 해결
+         *      findAll = findMemberFetchJoin = findMemberEntityGraph = findByUsername
+         *
+         * @NamedEntityGraph(name = "Member.all", attributeNodes = @NamedAttributeNode("team"))
+         *      Member Entity 에 추가
+         *      @EntityGraph("Member.all")
+         */
+        memberRepository.findAll().forEach(m -> {
+            System.out.println("member = " + m.getUsername());
+            System.out.println("member.team = " + m.getTeam().getName());
+        });
+        em.clear();
+
+        memberRepository.findMemberEntityGraph().forEach(m -> {
+            System.out.println("member = " + m.getUsername());
+            System.out.println("member.team = " + m.getTeam().getName());
+        });
+
+        //then
+
+
+    }
 }
