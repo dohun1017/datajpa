@@ -3,6 +3,10 @@ package study.datajpa.repository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.Sort;
 import org.springframework.transaction.annotation.Transactional;
 import study.datajpa.dto.MemberDto;
 import study.datajpa.entity.Member;
@@ -181,8 +185,48 @@ class MemberRepositoryTest {
         Optional<Member> optionalMember = memberRepository.findOptionalByUsername(member1.getUsername());
 
         //then
+    }
 
+    @Test
+    public void paging() throws Exception {
+        //given
+        memberRepository.save(new Member("member1", 10));
+        memberRepository.save(new Member("member2", 10));
+        memberRepository.save(new Member("member3", 10));
+        memberRepository.save(new Member("member4", 10));
+        memberRepository.save(new Member("member5", 10));
 
+        int age = 10;
+        int memberCount = 5;
+        int limit = 3;
+        int pageNum = 0;
+        int totalPageCount = 2;
+
+        PageRequest pageRequest = PageRequest.of(pageNum, limit, Sort.Direction.DESC, "username");
+
+        //when
+        Page<Member> page = memberRepository.findByAge(age, pageRequest);
+        List<Member> content = page.getContent();
+
+        /**
+         * API에서 entity를 직접 내보내는 것은 상당히 위험함하다.
+         *      page.map의 함수를 사용하여 Dto 객체로 변환 후 내보내야 한다.
+         */
+        Page<MemberDto> toMap = page.map(member -> new MemberDto(member.getId(), member.getUsername(), null));
+
+        //then
+        //Page와 Slice 모두 가지고 있는 기능
+        assertEquals(limit, content.size());
+        assertEquals(pageNum, page.getNumber());
+        assertTrue(page.isFirst());
+        assertTrue(page.hasNext());
+
+        /**
+         * Slice 에는 없는 기능
+         * limit + 1 의 쿼리를 보냄으로써 뒤의 데이터가 있는지 정도만 확인함.
+         */
+        assertEquals(memberCount, page.getTotalElements());
+        assertEquals(totalPageCount, page.getTotalPages());
     }
 
 }

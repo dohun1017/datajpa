@@ -1,5 +1,8 @@
 package study.datajpa.repository;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -46,5 +49,15 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     Member findMemberByUsername(String username);               //단건
     Optional<Member> findOptionalByUsername(String username);   //단건 Optional
 
-
+    /**
+     * Slice: limit + 1의 갯수만 조회하여 뒤의 페이지가 있는지 없는지만 확인
+     * Page: 페이징 기능 전부 사용 가능
+     *
+     * 쿼리가 복잡해질때는 countQuery를 따로 작성 해주는 것이 좋음.
+     *      따로 작성하지 않으면 countQuery도 join을 함.
+     *
+     * @Query(value = "select m from Member m left join m.team t",
+     *      countQuery = "select count(m) from Member m")
+     */
+    Page<Member> findByAge(int age, Pageable pageable);
 }
