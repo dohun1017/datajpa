@@ -68,7 +68,7 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
      *
      * 벌크 연산 이후 영속성 컨텍스트 초기화 하기
      */
-    @Modifying
+    @Modifying(clearAutomatically = true)
     @Query(value = "update Member m set m.age = m.age + 1 where m.age >= :age")
     int bulkAgePlus(@Param("age") int age);
 
