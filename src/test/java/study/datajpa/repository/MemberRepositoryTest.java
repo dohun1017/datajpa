@@ -8,6 +8,7 @@ import study.datajpa.dto.MemberDto;
 import study.datajpa.entity.Member;
 import study.datajpa.entity.Team;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -111,11 +112,12 @@ class MemberRepositoryTest {
         memberRepository.save(member1);
         memberRepository.save(member2);
 
-        List<String> usernameList = Stream.<String>builder()
-                .add(member1.getUsername())
-                .add(member2.getUsername())
-                .build()
-                .collect(Collectors.toList());
+//        List<String> usernameList = Stream.<String>builder()
+//                .add(member1.getUsername())
+//                .add(member2.getUsername())
+//                .build()
+//                .collect(Collectors.toList());
+        List<String> usernameList = Arrays.asList(member1.getUsername(), member2.getUsername());
 
         //when
         List<String> findUsernameList = memberRepository.findUsernameList();
@@ -142,6 +144,24 @@ class MemberRepositoryTest {
 
         //then
         assertEquals(memberDto, memberDtoList.get(0));
+    }
+
+    @Test
+    public void findByNames() throws Exception {
+        //given
+        Member member1 = new Member("AAA", 10);
+        Member member2 = new Member("BBB", 20);
+        memberRepository.save(member1);
+        memberRepository.save(member2);
+
+        List<Member> members = Arrays.asList(member1, member2);
+
+        //when
+        List<Member> findMembers = memberRepository.findByNames(Arrays.asList(member1.getUsername(), member2.getUsername()));
+
+        //then
+        assertEquals(members, findMembers);
+
     }
 
 }
