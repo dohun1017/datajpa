@@ -10,6 +10,7 @@ import study.datajpa.entity.Team;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -161,6 +162,26 @@ class MemberRepositoryTest {
 
         //then
         assertEquals(members, findMembers);
+
+    }
+
+    @Test
+    public void returnTypeTest() throws Exception {
+        //given
+        Member member1 = new Member("AAA", 10);
+        Member member2 = new Member("BBB", 20);
+        memberRepository.save(member1);
+        memberRepository.save(member2);
+
+        List<Member> members = Arrays.asList(member1);
+
+        //when
+        List<Member> memberList = memberRepository.findListByUsername(member1.getUsername());
+        Member findMember = memberRepository.findMemberByUsername(member1.getUsername());
+        Optional<Member> optionalMember = memberRepository.findOptionalByUsername(member1.getUsername());
+
+        //then
+
 
     }
 
