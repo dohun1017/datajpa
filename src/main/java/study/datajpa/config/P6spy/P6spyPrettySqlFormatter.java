@@ -13,8 +13,9 @@ public class P6spyPrettySqlFormatter implements MessageFormattingStrategy {
     @Override
     public String formatMessage(int connectionId, String now, long elapsed, String category, String prepared, String sql, String url) {
         sql = new StringBuilder()
-                .append(formatSql(category, prepared))
-                .append("\n--------------------------------------------------------------")
+                //prepared Query
+//                .append(formatSql(category, prepared))
+//                .append("\n--------------------------------------------------------------")
                 .append(formatSql(category, sql))
                 .toString();
 
