@@ -99,4 +99,20 @@ public interface MemberRepository extends JpaRepository<Member, Long>, MemberRep
      * 프로젝션 대상이 ROOT가 아니면 left outer join 처리
      */
     <T> List<T> findProjectionByUsername(@Param("username") String username, Class<T> type);
+
+    /**
+     * 반환타입에 제약이 있음
+     *      네이티브 SQL을 DTO로 조회할 때는 JdbcTemplate or myBatis 권장
+     */
+    @Query(value = "select * from member where username = ?", nativeQuery = true)
+    Member findByNativeQuery(String username);
+
+    /**
+     * 정적쿼리만 사용하길 권함.
+     */
+    @Query(value = "select m.member_id as id, m.username, t.name as teamName" +
+            " from member m left join team t",
+            countQuery = "select count(*) from member",
+            nativeQuery = true)
+    Page<MemberProjection> findByNativeProjection(Pageable pageable);
 }
