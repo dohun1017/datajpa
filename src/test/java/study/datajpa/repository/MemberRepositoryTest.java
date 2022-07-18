@@ -3,10 +3,7 @@ package study.datajpa.repository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Slice;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.transaction.annotation.Transactional;
 import study.datajpa.dto.MemberDto;
 import study.datajpa.entity.Member;
@@ -346,5 +343,41 @@ class MemberRepositoryTest {
     @Test
     public void callCustom() throws Exception {
         List<Member> result = memberRepository.findMemberCustom();
+    }
+
+    @Test
+    public void queryByExample() throws Exception {
+        //given
+        Team teamA = new Team("teamA");
+        em.persist(teamA);
+
+        Member m1 = new Member("m1", 0, teamA);
+        Member m2 = new Member("m2", 0, teamA);
+        em.persist(m1);
+        em.persist(m2);
+
+        em.flush();
+        em.clear();
+
+        //when
+        //Probe
+        Member member = new Member("m1");
+        Team team = new Team("teamA");
+        member.setTeam(team);
+
+        // "age" 속성은 where 절에서 무시한다.
+        ExampleMatcher matcher = ExampleMatcher.matching()
+                .withIgnorePaths("age");
+
+        // join에서 완벽한 해결이 안됨.(inner join만 가능함) -> 실무 도입 어려움.
+        Example<Member> example = Example.of(member, matcher);
+
+        List<Member> findAll = memberRepository.findAll(example);
+        Member findMember = findAll.get(0);
+
+        //then
+        assertEquals(1, findAll.size());
+        assertEquals(m1.getUsername(), findMember.getUsername());
+
     }
 }
