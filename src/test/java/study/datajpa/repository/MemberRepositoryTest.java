@@ -13,8 +13,6 @@ import javax.persistence.EntityManager;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -378,6 +376,30 @@ class MemberRepositoryTest {
         //then
         assertEquals(1, findAll.size());
         assertEquals(m1.getUsername(), findMember.getUsername());
+    }
+    
+    @Test
+    public void projectionTest() throws Exception {
+        //given
+        Team teamA = new Team("teamA");
+        em.persist(teamA);
 
+        Member m1 = new Member("m1", 0, teamA);
+        Member m2 = new Member("m2", 0, teamA);
+        em.persist(m1);
+        em.persist(m2);
+
+        em.flush();
+        em.clear();
+
+        //when
+        List<NestedClosedProjection> result = memberRepository.findProjectionByUsername("m1", NestedClosedProjection.class);
+        for (NestedClosedProjection usernameOnly : result) {
+            System.out.println("usernameOnly = " + usernameOnly);
+            System.out.println("usernameOnly.getUsername() = " + usernameOnly.getUsername());
+        }
+        //then
+        
+        
     }
 }
